@@ -6,11 +6,6 @@
 $ GOOS=darwin GOARCH=amd64 go build -o nothing
 ```
 
-### run
-```bash
-$ ./nothing [command] [flag]
-```
-
 ### Command
 ```bash
 Usage: nothing [COMMNAD] [RESOURCE]

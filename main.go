@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
+	"git.datacentric.kr/handh/NothingAI-CLI/cmd"
 )
 
 func main() {
-	fmt.Println("Hello World")
+	cmd.Execute()
 }

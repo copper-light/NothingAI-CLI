@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"git.datacentric.kr/handh/NothingAI-CLI/Constants"
+	"git.datacentric.kr/handh/NothingAI-CLI/constants"
 	"github.com/spf13/cobra"
 	"os"
 )
@@ -13,7 +13,7 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		version, _ := cmd.Flags().GetBool("version")
 		if version {
-			fmt.Println(fmt.Sprintf("%s version %s", Constants.APP_NAME, Constants.VERSION))
+			fmt.Println(fmt.Sprintf("%s version %s", constants.APP_NAME, constants.VERSION))
 		} else {
 			fmt.Println("Usage: nothing [command] [flags]")
 		}
@@ -24,7 +24,13 @@ var rootCmd = &cobra.Command{
 
 var getCmd = &cobra.Command{
 	Use:   "get",
-	Short: "get desc",
+	Short: "List resources",
+}
+
+var descCmd = &cobra.Command{
+	Use:     "describe",
+	Aliases: []string{"desc"},
+	Short:   "Return information on resource",
 }
 
 func Execute() {
@@ -34,9 +40,17 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.AddCommand(versionCmd)
 	rootCmd.Flags().BoolP("version", "v", false, "Print version information")
 
+	// Sub Commands
 	rootCmd.AddCommand(getCmd)
-	getCmd.AddCommand(modelCmd)
+	rootCmd.AddCommand(descCmd)
+
+	// Resources
+	getCmd.AddCommand(modelsCmd)
+	getCmd.AddCommand(datasetsCmd)
+	getCmd.AddCommand(experimentsCmd)
+	getCmd.AddCommand(tasksCmd)
+
+	descCmd.AddCommand(tasksCmd)
 }

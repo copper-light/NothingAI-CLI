@@ -11,9 +11,9 @@ $ GOOS=darwin GOARCH=amd64 go build -o nothing
 Usage: nothing [COMMNAD] [RESOURCE]
 
 Common Commands:
-  get          List resources
+  get          List resources.go
   create       Create a new resource
-  delete       Delete resources
+  delete       Delete resources.go
   edit         Edit the resource information  
   exec         Execute a command in a experimant
   logs         Fetch the logs of a task

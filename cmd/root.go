@@ -8,7 +8,7 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "nothing",
+	Use:   "nothing [COMMAND]",
 	Short: "CLI to Nothing AI",
 	Run: func(cmd *cobra.Command, args []string) {
 		version, _ := cmd.Flags().GetBool("version")
@@ -17,20 +17,18 @@ var rootCmd = &cobra.Command{
 		} else {
 			fmt.Println("Usage: nothing [command] [flags]")
 		}
-
 		fmt.Println()
 	},
 }
 
-var getCmd = &cobra.Command{
-	Use:   "get",
-	Short: "List resources",
+var basicCmdGroup = &cobra.Group{
+	Title: "Basic Commands",
+	ID:    "basic",
 }
 
-var descCmd = &cobra.Command{
-	Use:     "describe",
-	Aliases: []string{"desc"},
-	Short:   "Return information on resource",
+var otherCmdGroup = &cobra.Group{
+	Title: "Other Commands",
+	ID:    "other",
 }
 
 func Execute() {
@@ -42,15 +40,7 @@ func Execute() {
 func init() {
 	rootCmd.Flags().BoolP("version", "v", false, "Print version information")
 
-	// Sub Commands
-	rootCmd.AddCommand(getCmd)
-	rootCmd.AddCommand(descCmd)
-
-	// Resources
-	getCmd.AddCommand(modelsCmd)
-	getCmd.AddCommand(datasetsCmd)
-	getCmd.AddCommand(experimentsCmd)
-	getCmd.AddCommand(tasksCmd)
-
-	descCmd.AddCommand(tasksCmd)
+	// Basic Commands
+	rootCmd.AddGroup(basicCmdGroup)
+	rootCmd.AddGroup(otherCmdGroup)
 }

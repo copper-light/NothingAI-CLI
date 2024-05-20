@@ -8,6 +8,7 @@ $ GOOS=darwin GOARCH=amd64 go build -o nothing
 
 ### Command
 ```bash
+$ nothing --help
 CLI to Nothing AI
 
 Usage:

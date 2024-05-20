@@ -130,7 +130,7 @@ func CreateResource(resourceType string, body map[string]any) (int, error) {
 	var result = -1
 	requestURL := fmt.Sprintf(RESOURCE_URL, settings.GetServerHost(), resourceType)
 	body, err := Request("POST", requestURL, body)
-
+	nt
 	if err != nil {
 		return result, err
 	}

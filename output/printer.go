@@ -2,17 +2,18 @@ package output
 
 import (
 	"fmt"
+	"github.com/iancoleman/orderedmap"
 	"strconv"
 	"strings"
 )
 
-func Keys(m map[string]any) []string {
-	result := make([]string, 0, len(m))
-	for k := range m {
-		result = append(result, k)
-	}
-	return result
-}
+//func Keys(m map[string]any) []string {
+//	result := make([]string, 0, len(m))
+//	for k := range m {
+//		result = append(result, k)
+//	}
+//	return result
+//}
 
 func PrintTable(data []any, cols []string, displayHeader bool) {
 	var colLength []int
@@ -25,7 +26,12 @@ func PrintTable(data []any, cols []string, displayHeader bool) {
 	}
 
 	if cols == nil {
-		cols = Keys(data[0].(map[string]any))
+		keys, ok := data[0].(orderedmap.OrderedMap)
+		if ok {
+			cols = keys.Keys()
+		} else {
+			return
+		}
 	}
 	colLength = make([]int, len(cols))
 	colCnt = len(cols)
@@ -48,10 +54,10 @@ func PrintTable(data []any, cols []string, displayHeader bool) {
 	}
 
 	for i, row := range data {
-		mapRow := row.(map[string]any)
+		mapRow := row.(orderedmap.OrderedMap)
 		table[i+indexHeader] = make([]string, colCnt)
 		for j, col := range cols {
-			value := mapRow[col]
+			value, _ := mapRow.Get(col)
 			if value == nil {
 				value = ""
 			}
@@ -71,15 +77,17 @@ func PrintTable(data []any, cols []string, displayHeader bool) {
 	}
 }
 
-func PrintKeyValue(data map[string]any) {
+func PrintKeyValue(data *orderedmap.OrderedMap) {
 	length := 0
-	for key, _ := range data {
+	keys := data.Keys()
+	for _, key := range keys {
 		if length < len(key) {
 			length = len(key)
 		}
 	}
 
-	for key, value := range data {
+	for _, key := range keys {
+		value, _ := data.Get(key)
 		if value == nil {
 			value = ""
 		}

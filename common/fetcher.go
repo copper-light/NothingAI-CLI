@@ -5,15 +5,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"git.datacentric.kr/handh/NothingAI-CLI/settings"
+	"github.com/iancoleman/orderedmap"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
 )
 
-func Request(method string, requestURL string, requestData map[string]any) (map[string]interface{}, error) {
+func Request(method string, requestURL string, requestData map[string]any) (*orderedmap.OrderedMap, error) {
 	var bodyData *bytes.Buffer = nil
-	var result map[string]interface{} = nil
+	//var result map[string]interface{} = nil
 	client := http.Client{}
 
 	if requestData != nil {
@@ -57,12 +58,14 @@ func Request(method string, requestURL string, requestData map[string]any) (map[
 
 	body, err := io.ReadAll(resp.Body)
 
-	result = make(map[string]interface{})
+	//result = make(map[string]interface{})
+	result := orderedmap.New()
+
 	err = json.Unmarshal([]byte(string(body)), &result)
 	if err != nil {
 		switch resp.StatusCode {
 		case http.StatusNotFound:
-			err = fmt.Errorf("error: not found resource")
+			err = fmt.Errorf("error: resource not found")
 		default:
 			err = fmt.Errorf("error: unexpected status code: %d", resp.StatusCode)
 		}
@@ -73,80 +76,147 @@ func Request(method string, requestURL string, requestData map[string]any) (map[
 
 func GetResources(resourceType string) ([]any, error) {
 	var results []any
+	var items []any
+	var objectValue orderedmap.OrderedMap
+	var value any
+	var ok bool
 	requestURL := fmt.Sprintf(RESOURCE_URL, settings.GetServerHost(), resourceType)
 	body, err := Request("GET", requestURL, nil)
 	if err != nil {
 		return nil, err
 	}
-	code, _ := body["code"].(float64)
-	if int(code) == 200 {
-		data := body["data"].(map[string]any)
-		items := data["items"].([]any)
-		if data["next"] == nil {
+	value, ok = body.Get("code")
+	if !ok {
+		return nil, fmt.Errorf("returned data is not json format")
+	}
+	code := int(value.(float64))
+	if code == 200 {
+		value, ok = body.Get("data")
+		objectValue = value.(orderedmap.OrderedMap)
+
+		value, ok = objectValue.Get("items")
+		items = value.([]any)
+
+		value, ok = objectValue.Get("next")
+		if value == nil {
 			requestURL = ""
 		} else {
-			requestURL = data["next"].(string)
+			requestURL = value.(string)
 		}
 		results = append(results, items...)
 	} else {
 		message := ""
-		if body["message"] != nil {
-			message = body["message"].(string)
+		value, ok = body.Get("message")
+		if ok {
+			message = value.(string)
 		} else {
 			message = "Unknown Error"
 		}
 		err = fmt.Errorf("[%v] %s", code, message)
 		return nil, err
 	}
-
 	return results, nil
 }
 
-func DescribeResource(resourceType string, id string) (map[string]any, error) {
-	var results map[string]any
+func DescribeResource(resourceType string, id string) (*orderedmap.OrderedMap, error) {
+	var results orderedmap.OrderedMap
+	var value any
+	var ok bool
 	requestURL := fmt.Sprintf(RESOURCE_DETAIL_URL, settings.GetServerHost(), resourceType, id)
 	body, err := Request("GET", requestURL, nil)
 	if err != nil {
 		return nil, err
 	}
-	code, _ := body["code"].(float64)
-	if int(code) == 200 {
-		results = body["data"].(map[string]any)
+	value, ok = body.Get("code")
+	if !ok {
+		return nil, fmt.Errorf("returned data is not json format")
+	}
+
+	code := int(value.(float64))
+	if code == 200 {
+		value, ok = body.Get("data")
+		results = value.(orderedmap.OrderedMap)
+	} else if code == 404 {
+		err = fmt.Errorf("error: %s \"%v\" not found", resourceType, id)
+		return nil, err
 	} else {
 		message := ""
-		if body["message"] != nil {
-			message = body["message"].(string)
+		value, ok = body.Get("message")
+		if ok {
+			message = value.(string)
 		} else {
 			message = "Unknown Error"
 		}
-		err = fmt.Errorf("Error: (%v) %s", code, message)
+		err = fmt.Errorf("error: [%v] %s", code, message)
 		return nil, err
 	}
-	return results, nil
+	return &results, nil
 }
 
-func CreateResource(resourceType string, body map[string]any) (int, error) {
-	var data map[string]any
+func CreateResource(resourceType string, inputData map[string]any) (int, error) {
+	//var data map[string]any
 	var result = -1
+	var value any
+	var ok bool
 	requestURL := fmt.Sprintf(RESOURCE_URL, settings.GetServerHost(), resourceType)
-	body, err := Request("POST", requestURL, body)
-	nt
+	body, err := Request("POST", requestURL, inputData)
 	if err != nil {
 		return result, err
 	}
-	code, _ := body["code"].(float64)
-	if int(code) == 200 {
-		data = body["data"].(map[string]any)
-		result = int(data["id"].(float64))
+	value, ok = body.Get("code")
+	if !ok {
+		return result, fmt.Errorf("returned data is not json format")
+	}
+
+	code := int(value.(float64))
+	if code == 200 {
+		value, ok = body.Get("data")
+		id, _ := value.(*orderedmap.OrderedMap).Get("id")
+		result = int(id.(float64))
 	} else {
 		message := ""
-		if body["message"] != nil {
-			message = body["message"].(string)
+		value, ok = body.Get("message")
+		if ok {
+			message = value.(string)
 		} else {
 			message = "Unknown Error"
 		}
-		err = fmt.Errorf("Error: (%v) %s", code, message)
+		err = fmt.Errorf("[%v] %s", code, message)
 		return result, err
 	}
 	return result, err
+}
+
+func DeleteReousrce(resourceType string, id string) (bool, error) {
+	result := false
+	requestURL := fmt.Sprintf(RESOURCE_DETAIL_URL, settings.GetServerHost(), resourceType, id)
+	body, err := Request("DELETE", requestURL, nil)
+	if err != nil {
+		return result, err
+	}
+
+	value, ok := body.Get("code")
+	if !ok {
+		return result, fmt.Errorf("returned data is not json format")
+	}
+
+	code := int(value.(float64))
+	if code == 200 {
+		result = true
+	} else if code == 404 {
+		err = fmt.Errorf("error: %s \"%v\" not found", resourceType, id)
+		return result, err
+	} else {
+		message := ""
+		value, ok = body.Get("message")
+		if ok {
+			message = value.(string)
+		} else {
+			message = "Unknown Error"
+		}
+		err = fmt.Errorf("[%v] %s", code, message)
+		return result, err
+	}
+
+	return result, nil
 }

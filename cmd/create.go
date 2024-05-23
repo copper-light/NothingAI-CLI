@@ -21,7 +21,7 @@ func createResource(resourceType string, name string, options map[string]string)
 	} else {
 		fmt.Printf("Created %v %v(%v)\n", resourceType, name, id)
 	}
-}
+}g
 
 var createCmd = &cobra.Command{
 	Use:     "create [RESOURCE_TYPE] [NAME]",

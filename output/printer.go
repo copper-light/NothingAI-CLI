@@ -2,6 +2,7 @@ package output
 
 import (
 	"fmt"
+	"git.datacentric.kr/handh/NothingAI-CLI/common"
 	"github.com/iancoleman/orderedmap"
 	"strconv"
 	"strings"
@@ -42,6 +43,8 @@ func PrintTable(data []any, cols []string, displayHeader bool) {
 			colName := fmt.Sprintf("%v", col)
 			colName = strings.Replace(colName, "_", " ", -1)
 			table[0][i] = strings.ToUpper(colName)
+			//hangulLength := common.CountingHangul(col)
+			//colLength[i] = (len(col) - hangulLength) + (hangulLength * 2)
 			colLength[i] = len(col)
 		}
 	} else {
@@ -53,6 +56,16 @@ func PrintTable(data []any, cols []string, displayHeader bool) {
 		indexHeader = 1
 	}
 
+	hangulLengthTable := make([][]int, len(data)+indexHeader)
+	for i := range hangulLengthTable {
+		hangulLengthTable[i] = make([]int, colCnt)
+		if displayHeader {
+			for j := range colCnt {
+				hangulLengthTable[i][j] = 0
+			}
+		}
+	}
+
 	for i, row := range data {
 		mapRow := row.(orderedmap.OrderedMap)
 		table[i+indexHeader] = make([]string, colCnt)
@@ -61,16 +74,20 @@ func PrintTable(data []any, cols []string, displayHeader bool) {
 			if value == nil {
 				value = ""
 			}
-			table[i+indexHeader][j] = fmt.Sprintf("%v", value)
-			colLen := len(table[i+indexHeader][j])
+			valueStr := fmt.Sprintf("%v", value)
+			table[i+indexHeader][j] = valueStr
+			hangulLength := common.CountingHangul(valueStr)
+			colLen := len(valueStr) - hangulLength
+			hangulLengthTable[i+indexHeader][j] = hangulLength
 			if colLength[j] < colLen {
 				colLength[j] = colLen
 			}
 		}
 	}
-	for _, row := range table {
+	for i, row := range table {
 		for j, col := range row {
-			format := "%-" + strconv.Itoa(colLength[j]+3) + "s"
+			//fmt.Println(colLength[j], hangulLengthTable[i][j], col)
+			format := "%-" + strconv.Itoa(colLength[j]-hangulLengthTable[i][j]+3) + "s"
 			fmt.Printf(format, col)
 		}
 		fmt.Println()

@@ -15,7 +15,7 @@ var resourceMap = map[string]string{
 
 	"experiments": "experiments",
 	"experiment":  "experiments",
-	"expr":        "experiments",
+	"exp":         "experiments",
 
 	"tasks": "tasks",
 	"task":  "tasks",

@@ -2,7 +2,7 @@ package output
 
 import (
 	"fmt"
-	"git.datacentric.kr/handh/NothingAI-CLI/common"
+	"git.datacentric.kr/handh/NothingAI-CLI/common/utils"
 	"github.com/iancoleman/orderedmap"
 	"strconv"
 	"strings"
@@ -76,7 +76,7 @@ func PrintTable(data []any, cols []string, displayHeader bool) {
 			}
 			valueStr := fmt.Sprintf("%v", value)
 			table[i+indexHeader][j] = valueStr
-			hangulLength := common.CountingHangul(valueStr)
+			hangulLength := utils.CountingHangul(valueStr)
 			colLen := len(valueStr) - hangulLength
 			hangulLengthTable[i+indexHeader][j] = hangulLength
 			if colLength[j] < colLen {

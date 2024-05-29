@@ -26,6 +26,11 @@ var basicCmdGroup = &cobra.Group{
 	ID:    "basic",
 }
 
+var fileCmdGroup = &cobra.Group{
+	Title: "File Commands",
+	ID:    "file",
+}
+
 var otherCmdGroup = &cobra.Group{
 	Title: "Other Commands",
 	ID:    "other",
@@ -42,5 +47,6 @@ func init() {
 
 	// Basic Commands
 	rootCmd.AddGroup(basicCmdGroup)
+	rootCmd.AddGroup(fileCmdGroup)
 	rootCmd.AddGroup(otherCmdGroup)
 }

@@ -9,7 +9,7 @@ import (
 
 func deleteResource(resourceType string, id string) {
 	resourceType = common.GetResourceType(resourceType)
-	ok, err := common.DeleteReousrce(resourceType, id)
+	ok, err := common.DeleteResource(resourceType, id)
 	if err != nil {
 		fmt.Println(err)
 	} else if ok {

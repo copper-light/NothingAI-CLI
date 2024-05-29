@@ -4,6 +4,10 @@
 ### build
 ```bash
 $ GOOS=darwin GOARCH=amd64 go build -o nothing
+
+# nothing 빌드파일이 있는 곳에서, 실행환경에서 넣음
+$ export NOTHING_HOME="설치경로"
+$ export PATH=$PATH:$NOTHING_HOME/bin
 ```
 
 ### Command

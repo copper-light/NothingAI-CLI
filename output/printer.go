@@ -8,14 +8,6 @@ import (
 	"strings"
 )
 
-//func Keys(m map[string]any) []string {
-//	result := make([]string, 0, len(m))
-//	for k := range m {
-//		result = append(result, k)
-//	}
-//	return result
-//}
-
 func PrintTable(data []any, cols []string, displayHeader bool) {
 	var colLength []int
 	var table [][]string
@@ -43,8 +35,6 @@ func PrintTable(data []any, cols []string, displayHeader bool) {
 			colName := fmt.Sprintf("%v", col)
 			colName = strings.Replace(colName, "_", " ", -1)
 			table[0][i] = strings.ToUpper(colName)
-			//hangulLength := common.CountingHangul(col)
-			//colLength[i] = (len(col) - hangulLength) + (hangulLength * 2)
 			colLength[i] = len(col)
 		}
 	} else {
@@ -86,7 +76,6 @@ func PrintTable(data []any, cols []string, displayHeader bool) {
 	}
 	for i, row := range table {
 		for j, col := range row {
-			//fmt.Println(colLength[j], hangulLengthTable[i][j], col)
 			format := "%-" + strconv.Itoa(colLength[j]-hangulLengthTable[i][j]+3) + "s"
 			fmt.Printf(format, col)
 		}

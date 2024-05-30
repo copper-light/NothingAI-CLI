@@ -7,8 +7,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var logCmd = &cobra.Command{
-	Use:   "log [TASK_ID]",
+var logsCmd = &cobra.Command{
+	Use:   "logs [TASK_ID]",
 	Short: "Show log of task",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
@@ -21,13 +21,18 @@ var logCmd = &cobra.Command{
 		logs, err := common.LogTask(id)
 		if err != nil {
 			fmt.Println(err)
-		}
-		for _, log := range logs {
-			fmt.Println(log)
+		} else {
+			if len(logs) == 0 {
+				fmt.Println("No logs found")
+			} else {
+				for _, log := range logs {
+					fmt.Println(log)
+				}
+			}
 		}
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(logCmd)
+	rootCmd.AddCommand(logsCmd)
 }

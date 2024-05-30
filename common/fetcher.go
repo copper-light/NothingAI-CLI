@@ -144,6 +144,8 @@ func responseParser(response *http.Response) (*orderedmap.OrderedMap, error) {
 		value, ok = body.Get("detail")
 		message := value.(string)
 		err = fmt.Errorf(fmt.Sprintf("%s", message))
+	} else if code == 404 {
+		err = fmt.Errorf("resource not found")
 	} else {
 		message := ""
 		value, ok = body.Get("message")
@@ -235,27 +237,19 @@ func ExecExperiment(id string) (bool, error) {
 	return true, nil
 }
 
-func LogTask(id string) ([]string, error) {
+func LogTask(id string) ([]any, error) {
 	requestURL := fmt.Sprintf(LOG_URL, settings.GetServerHost(), id)
 	bodyData, err := Request("GET", requestURL, nil)
-	var logs []string
+	var logs []any
 	if err != nil {
 		return nil, err
 	} else {
-		value, _ := bodyData.Get("items")
-		logs = value.([]string)
+		value, ok := bodyData.Get("items")
+		if ok {
+			logs = value.([]any)
+		} else {
+			logs = []any{}
+		}
 	}
 	return logs, nil
 }
-
-//func GetTask(status string, limit string, offset string, experiment string) (bool, error) {
-//	requestURL := fmt.Sprintf(TASK_URL, settings.GetServerHost())
-//	if status == "0" {
-//
-//	}
-//	_, err := Request("GET", requestURL, nil)
-//	if err != nil {
-//		return false, err
-//	}
-//	return true, nil
-//}
